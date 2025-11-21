@@ -1,0 +1,13 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=SmartAutoRoam
+Comment=Intelligent WiFi Auto-Roaming Manager
+Exec=/usr/local/bin/SmartAutoRoam
+Icon=smartautoroam
+Terminal=false
+Categories=Network;System;Settings;
+Keywords=wifi;network;roaming;wireless;connection;
+StartupNotify=true
+StartupWMClass=SmartAutoRoam
+

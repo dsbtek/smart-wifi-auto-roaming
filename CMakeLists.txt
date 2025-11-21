@@ -51,3 +51,12 @@ if(Qt6Charts_FOUND)
 endif()
 
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
+
+# Install desktop file
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/SmartAutoRoam.desktop
+        DESTINATION share/applications)
+
+# Install icon
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/icons/wifi.svg
+        DESTINATION share/icons/hicolor/scalable/apps
+        RENAME smartautoroam.svg)
