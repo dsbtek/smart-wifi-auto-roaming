@@ -88,7 +88,7 @@ bool RoamingManager::pingCheck() const {
     return p.exitCode() == 0;
 }
 
-double RoamingManager::measureCurrentSpeed() {
+double RoamingManager::measureCurrentSpeed(const QString &ssid) {
     SpeedTester tester;
     SpeedTestResult result = tester.quickTest();
 
@@ -97,7 +97,7 @@ double RoamingManager::measureCurrentSpeed() {
         logEvent("SPEED_TEST", QString("Current speed: %1 Mbps, Latency: %2 ms")
                  .arg(result.downloadSpeedMbps, 0, 'f', 2)
                  .arg(result.latencyMs, 0, 'f', 1));
-        emit speedMeasured(result.downloadSpeedMbps);
+        emit speedMeasured(ssid, result.downloadSpeedMbps);
         return result.downloadSpeedMbps;
     }
 
@@ -130,11 +130,10 @@ bool RoamingManager::shouldSwitchBasedOnSpeed(const QString &currentSSID,
                                                const QString &candidateSSID,
                                                int currentSignal,
                                                int candidateSignal) {
-    Q_UNUSED(currentSSID);
     Q_UNUSED(candidateSSID);
 
     // Measure current actual speed
-    double currentSpeed = measureCurrentSpeed();
+    double currentSpeed = measureCurrentSpeed(currentSSID);
 
     if (currentSpeed < 0) {
         // Speed test failed, fall back to signal-based decision
@@ -253,7 +252,7 @@ void RoamingManager::onTick() {
         static int speedCheckCounter = 0;
         speedCheckCounter++;
         if (speedCheckCounter >= 5) { // Every 5 scans
-            measureCurrentSpeed();
+            measureCurrentSpeed(connected);
             speedCheckCounter = 0;
         }
         return;
@@ -290,7 +289,7 @@ void RoamingManager::onTick() {
                 // After switching, measure new speed
                 if (ok) {
                     QThread::sleep(2); // Wait for connection to stabilize
-                    measureCurrentSpeed();
+                    measureCurrentSpeed(best.ssid);
                 }
             } else {
                 logEvent("SWITCH_REJECTED", QString("Speed test indicates %1 is not worth switching to")

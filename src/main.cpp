@@ -25,8 +25,9 @@ int main(int argc, char *argv[])
     });
 
     // Connect speed measurements for chart updates
-    QObject::connect(rm, &RoamingManager::speedMeasured, &w, [&w](double speed) {
-        QMetaObject::invokeMethod(&w, "updateSpeedChart", Qt::QueuedConnection, Q_ARG(double, speed));
+    QObject::connect(rm, &RoamingManager::speedMeasured, &w, [&w](const QString &ssid, double speed) {
+        QMetaObject::invokeMethod(&w, "updateSpeedChart", Qt::QueuedConnection,
+                                  Q_ARG(QString, ssid), Q_ARG(double, speed));
     });
 
     // Connect network signal updates for chart updates

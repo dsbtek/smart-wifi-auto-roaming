@@ -22,7 +22,7 @@ public:
 public slots:
     void appendLog(const QString &message);
     void updateSignalChart(const QString &ssid, int signal);
-    void updateSpeedChart(double speedMbps);
+    void updateSpeedChart(const QString &ssid, double speedMbps);
 
 private slots:
     void refreshNetworks();
@@ -53,7 +53,7 @@ private:
     QChartView *m_signalChartView;
     QChartView *m_speedChartView;
     QMap<QString, QLineSeries*> m_signalSeries;
-    QLineSeries *m_speedSeries;
+    QMap<QString, QLineSeries*> m_speedSeries;
 
     void setupTrayIcon();
     void setupCharts();

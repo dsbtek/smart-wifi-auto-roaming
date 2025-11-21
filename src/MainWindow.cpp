@@ -31,8 +31,7 @@ MainWindow::MainWindow(QWidget *parent)
       m_trayIcon(nullptr),
       m_trayMenu(nullptr),
       m_signalChartView(nullptr),
-      m_speedChartView(nullptr),
-      m_speedSeries(nullptr)
+      m_speedChartView(nullptr)
 {
     ui->setupUi(this);
     Database::instance().initialize();
@@ -264,21 +263,16 @@ void MainWindow::setupCharts() {
     speedChart->setTitle("Download Speed Over Time");
     speedChart->setAnimationOptions(QChart::SeriesAnimations);
 
-    m_speedSeries = new QLineSeries();
-    m_speedSeries->setName("Speed (Mbps)");
-    speedChart->addSeries(m_speedSeries);
-
+    // Create axes but don't add any series yet (will be added dynamically per network)
     QDateTimeAxis *speedAxisX = new QDateTimeAxis;
     speedAxisX->setFormat("HH:mm:ss");
     speedAxisX->setTitleText("Time");
     speedChart->addAxis(speedAxisX, Qt::AlignBottom);
-    m_speedSeries->attachAxis(speedAxisX);
 
     QValueAxis *speedAxisY = new QValueAxis;
     speedAxisY->setRange(0, 100);
     speedAxisY->setTitleText("Speed (Mbps)");
     speedChart->addAxis(speedAxisY, Qt::AlignLeft);
-    m_speedSeries->attachAxis(speedAxisY);
 
     m_speedChartView = new QChartView(speedChart);
     m_speedChartView->setRenderHint(QPainter::Antialiasing);
@@ -383,16 +377,33 @@ void MainWindow::updateSignalChart(const QString &ssid, int signal) {
 #endif
 }
 
-void MainWindow::updateSpeedChart(double speedMbps) {
+void MainWindow::updateSpeedChart(const QString &ssid, double speedMbps) {
 #ifdef HAVE_QTCHARTS
-    if (!m_speedSeries) return;
+    if (!m_speedChartView) return;
 
+    // Get or create series for this SSID
+    if (!m_speedSeries.contains(ssid)) {
+        QLineSeries *series = new QLineSeries();
+        series->setName(ssid);
+        m_speedSeries[ssid] = series;
+
+        QChart *chart = m_speedChartView->chart();
+        chart->addSeries(series);
+
+        // Attach to existing axes
+        if (!chart->axes(Qt::Horizontal).isEmpty() && !chart->axes(Qt::Vertical).isEmpty()) {
+            series->attachAxis(chart->axes(Qt::Horizontal).first());
+            series->attachAxis(chart->axes(Qt::Vertical).first());
+        }
+    }
+
+    QLineSeries *series = m_speedSeries[ssid];
     qint64 timestamp = QDateTime::currentMSecsSinceEpoch();
-    m_speedSeries->append(timestamp, speedMbps);
+    series->append(timestamp, speedMbps);
 
     // Keep only last 100 points
-    if (m_speedSeries->count() > 100) {
-        m_speedSeries->remove(0);
+    if (series->count() > 100) {
+        series->remove(0);
     }
 
     // Update axes ranges
@@ -406,18 +417,21 @@ void MainWindow::updateSpeedChart(double speedMbps) {
         }
     }
 
-    // Auto-scale Y axis based on data
+    // Auto-scale Y axis based on all series data
     if (!chart->axes(Qt::Vertical).isEmpty()) {
         QValueAxis *axisY = qobject_cast<QValueAxis*>(chart->axes(Qt::Vertical).first());
-        if (axisY && m_speedSeries->count() > 0) {
+        if (axisY) {
             double maxSpeed = 0;
-            for (const QPointF &point : m_speedSeries->points()) {
-                maxSpeed = qMax(maxSpeed, point.y());
+            for (QLineSeries *s : m_speedSeries) {
+                for (const QPointF &point : s->points()) {
+                    maxSpeed = qMax(maxSpeed, point.y());
+                }
             }
             axisY->setRange(0, qMax(10.0, maxSpeed * 1.2)); // 20% headroom
         }
     }
 #else
+    Q_UNUSED(ssid);
     Q_UNUSED(speedMbps);
 #endif
 }

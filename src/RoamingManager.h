@@ -22,7 +22,7 @@ signals:
     void started();
     void stopped();
     void logMessage(const QString &msg);
-    void speedMeasured(double speedMbps);
+    void speedMeasured(const QString &ssid, double speedMbps);
     void networkSignal(const QString &ssid, int signal);
 
 private slots:
@@ -50,7 +50,7 @@ private:
     // Speed-based decision making
     bool shouldSwitchBasedOnSpeed(const QString &currentSSID, const QString &candidateSSID,
                                    int currentSignal, int candidateSignal);
-    double measureCurrentSpeed();
+    double measureCurrentSpeed(const QString &ssid);
     double estimateSpeedForNetwork(const QString &ssid, int signal);
 
     void logEvent(const QString &event, const QString &detail = QString());
