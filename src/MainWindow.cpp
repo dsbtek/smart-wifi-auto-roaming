@@ -29,6 +29,8 @@ void MainWindow::loadSettingsToUi() {
     ui->spinScanInterval->setValue(ConfigManager::instance().get("scan_interval", 30).toInt());
     ui->spinMinDiff->setValue(ConfigManager::instance().get("min_signal_diff", 10).toInt());
     ui->spinThreshold->setValue(ConfigManager::instance().get("switch_signal_threshold", -75).toInt());
+    ui->spinMinSpeedImprovement->setValue(ConfigManager::instance().get("min_speed_improvement", 20.0).toDouble());
+    ui->spinMinAcceptableSpeed->setValue(ConfigManager::instance().get("min_acceptable_speed", 5.0).toDouble());
     // load preferred networks (comma separated)
     QString prefs = ConfigManager::instance().get("preferred_networks", "").toString();
     ui->linePreferred->setText(prefs);
@@ -38,6 +40,8 @@ void MainWindow::saveSettingsFromUi() {
     ConfigManager::instance().set("scan_interval", ui->spinScanInterval->value());
     ConfigManager::instance().set("min_signal_diff", ui->spinMinDiff->value());
     ConfigManager::instance().set("switch_signal_threshold", ui->spinThreshold->value());
+    ConfigManager::instance().set("min_speed_improvement", ui->spinMinSpeedImprovement->value());
+    ConfigManager::instance().set("min_acceptable_speed", ui->spinMinAcceptableSpeed->value());
     ConfigManager::instance().set("preferred_networks", ui->linePreferred->text());
     m_timer.start(ui->spinScanInterval->value() * 1000);
 }

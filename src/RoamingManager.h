@@ -34,12 +34,22 @@ private:
     // logic state
     QString m_lastBest;
     int m_stableCount;
+    double m_currentSpeed;  // Current connection speed in Mbps
+    double m_lastTestedSpeed;  // Last measured speed
 
     // helpers
     int scanIntervalSec() const;
-    int minSignalDiff() const;          // in percent points
-    int switchSignalThreshold() const;  // signal percent (0..100)
+    int minSignalDiff() const;          // in percent points (legacy, for fallback)
+    int switchSignalThreshold() const;  // signal percent (0..100, legacy)
+    double minSpeedImprovementPercent() const;  // Minimum speed improvement to trigger switch
+    double minAcceptableSpeedMbps() const;      // Minimum acceptable speed before considering switch
     bool pingCheck() const;
+
+    // Speed-based decision making
+    bool shouldSwitchBasedOnSpeed(const QString &currentSSID, const QString &candidateSSID,
+                                   int currentSignal, int candidateSignal);
+    double measureCurrentSpeed();
+    double estimateSpeedForNetwork(const QString &ssid, int signal);
 
     void logEvent(const QString &event, const QString &detail = QString());
 };

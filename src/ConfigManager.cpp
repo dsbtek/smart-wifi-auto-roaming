@@ -21,6 +21,8 @@ void ConfigManager::load() {
         {"min_signal_diff", "10"},
         {"switch_signal_threshold", "-75"},
         {"preferred_networks", ""}, // comma-separated
+        {"min_speed_improvement", "20.0"}, // 20% speed improvement required
+        {"min_acceptable_speed", "5.0"},   // 5 Mbps minimum acceptable speed
     };
     for (auto &d : defaults) {
         QSqlQuery get(Database::instance().db());

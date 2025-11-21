@@ -4,7 +4,12 @@ project(SmartAutoRoam VERSION 0.1 LANGUAGES CXX)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Core Gui)
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+set(CMAKE_AUTOUIC_SEARCH_PATHS ${CMAKE_CURRENT_SOURCE_DIR}/ui)
+
+find_package(Qt6 REQUIRED COMPONENTS Widgets Sql Core Gui Network)
 find_package(Qt6 COMPONENTS Charts QUIET)
 
 set(SOURCES
@@ -15,6 +20,7 @@ set(SOURCES
     src/Database.cpp
     src/ConfigManager.cpp
     src/RoamingManager.cpp
+    src/SpeedTester.cpp
 )
 
 set(HEADERS
@@ -24,15 +30,22 @@ set(HEADERS
     src/Database.h
     src/ConfigManager.h
     src/RoamingManager.h
+    src/SpeedTester.h
 )
 
-qt6_wrap_ui(UI_HEADERS ui/MainWindow.ui)
+set(UI_FILES
+    ui/MainWindow.ui
+)
 
-qt_add_resources(RCC resources.qrc)
+set(RESOURCES
+    src/resources.qrc
+)
 
-add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${UI_HEADERS} ${RCC})
+add_executable(${PROJECT_NAME} ${SOURCES} ${HEADERS} ${UI_FILES} ${RESOURCES})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::Sql Qt6::Core Qt6::Gui)
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_BINARY_DIR})
+
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::Sql Qt6::Core Qt6::Gui Qt6::Network)
 if(Qt6Charts_FOUND)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Charts)
 endif()

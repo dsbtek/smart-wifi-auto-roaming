@@ -33,7 +33,10 @@ bool Database::initialize() {
             ssid TEXT UNIQUE NOT NULL,
             last_signal INTEGER,
             preferred INTEGER DEFAULT 0,
-            last_connected DATETIME
+            last_connected DATETIME,
+            last_speed_mbps REAL,
+            avg_speed_mbps REAL,
+            speed_test_count INTEGER DEFAULT 0
         );
     )");
     q.exec(R"(
@@ -48,6 +51,17 @@ bool Database::initialize() {
             timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
             event TEXT,
             detail TEXT
+        );
+    )");
+    q.exec(R"(
+        CREATE TABLE IF NOT EXISTS speed_history (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            ssid TEXT NOT NULL,
+            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+            download_speed_mbps REAL,
+            upload_speed_mbps REAL,
+            latency_ms REAL,
+            signal_strength INTEGER
         );
     )");
     return true;
