@@ -97,6 +97,7 @@ double RoamingManager::measureCurrentSpeed() {
         logEvent("SPEED_TEST", QString("Current speed: %1 Mbps, Latency: %2 ms")
                  .arg(result.downloadSpeedMbps, 0, 'f', 2)
                  .arg(result.latencyMs, 0, 'f', 1));
+        emit speedMeasured(result.downloadSpeedMbps);
         return result.downloadSpeedMbps;
     }
 
@@ -187,6 +188,11 @@ void RoamingManager::onTick() {
     if (nets.isEmpty()) {
         logEvent("SCAN_EMPTY", "No networks visible");
         return;
+    }
+
+    // Emit network signals for chart updates
+    for (const auto &n : nets) {
+        emit networkSignal(n.ssid, n.signal);
     }
 
     // select best visible network by raw signal (0..100)

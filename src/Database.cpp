@@ -20,7 +20,14 @@ QString Database::dbPath() const {
 
 bool Database::initialize() {
     QString path = dbPath();
-    m_db = QSqlDatabase::addDatabase("QSQLITE");
+
+    // Check if database connection already exists
+    if (QSqlDatabase::contains(QSqlDatabase::defaultConnection)) {
+        m_db = QSqlDatabase::database(QSqlDatabase::defaultConnection);
+    } else {
+        m_db = QSqlDatabase::addDatabase("QSQLITE");
+    }
+
     m_db.setDatabaseName(path);
     if (!m_db.open()) {
         qCritical() << "Failed to open DB:" << m_db.lastError().text();

@@ -16,7 +16,17 @@
   <widget class="QWidget" name="centralwidget">
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <layout class="QHBoxLayout" name="topRow">
+     <widget class="QTabWidget" name="tabWidget">
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tabMain">
+       <attribute name="title">
+        <string>Networks &amp; Settings</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_2">
+        <item>
+         <layout class="QHBoxLayout" name="topRow">
       <item>
        <widget class="QGroupBox" name="groupNetworks">
         <property name="title">
@@ -186,21 +196,78 @@
       </item>
      </layout>
     </item>
+       </layout>
+      </widget>
 
-    <item>
-     <widget class="QGroupBox" name="groupLog">
-      <property name="title">
-       <string>Log</string>
-      </property>
-      <layout class="QVBoxLayout" name="vboxLog">
-       <item>
-        <widget class="QTextEdit" name="logView">
-         <property name="readOnly">
-          <bool>true</bool>
-         </property>
-        </widget>
-       </item>
-      </layout>
+      <widget class="QWidget" name="tabCharts">
+       <attribute name="title">
+        <string>Performance Charts</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_3">
+        <item>
+         <widget class="QGroupBox" name="groupSignalChart">
+          <property name="title">
+           <string>Signal Strength History</string>
+          </property>
+          <layout class="QVBoxLayout" name="vboxSignalChart">
+           <item>
+            <widget class="QWidget" name="signalChartContainer" native="true">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>200</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupSpeedChart">
+          <property name="title">
+           <string>Speed Test History</string>
+          </property>
+          <layout class="QVBoxLayout" name="vboxSpeedChart">
+           <item>
+            <widget class="QWidget" name="speedChartContainer" native="true">
+             <property name="minimumSize">
+              <size>
+               <width>0</width>
+               <height>200</height>
+              </size>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
+
+      <widget class="QWidget" name="tabLogs">
+       <attribute name="title">
+        <string>Logs</string>
+       </attribute>
+       <layout class="QVBoxLayout" name="verticalLayout_4">
+        <item>
+         <widget class="QGroupBox" name="groupLog">
+          <property name="title">
+           <string>Event Log</string>
+          </property>
+          <layout class="QVBoxLayout" name="vboxLog">
+           <item>
+            <widget class="QTextEdit" name="logView">
+             <property name="readOnly">
+              <bool>true</bool>
+             </property>
+            </widget>
+           </item>
+          </layout>
+         </widget>
+        </item>
+       </layout>
+      </widget>
      </widget>
     </item>
    </layout>

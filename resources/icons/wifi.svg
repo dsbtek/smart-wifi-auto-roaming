@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="64" height="64" viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg">
+  <!-- WiFi icon with signal waves -->
+  <g fill="none" stroke="#2196F3" stroke-width="3" stroke-linecap="round">
+    <!-- Outer wave -->
+    <path d="M 10 25 Q 32 5, 54 25" />
+    <!-- Middle wave -->
+    <path d="M 16 32 Q 32 16, 48 32" />
+    <!-- Inner wave -->
+    <path d="M 22 39 Q 32 29, 42 39" />
+  </g>
+  <!-- Center dot -->
+  <circle cx="32" cy="48" r="4" fill="#2196F3"/>
+</svg>
+

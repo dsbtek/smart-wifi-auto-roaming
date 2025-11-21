@@ -90,19 +90,22 @@ double SpeedTester::measureLatency(const QString &host) {
     QString prog = "ping";
     QStringList args = { "-c", "3", "-W", "1", host };
 #endif
-    
+
     QProcess p;
     p.start(prog, args);
     if (!p.waitForFinished(4000)) {
+        qDebug() << "SpeedTester: Ping timeout for" << host;
         return -1.0;
     }
-    
+
     if (p.exitCode() != 0) {
+        QString err = p.readAllStandardError();
+        qDebug() << "SpeedTester: Ping failed for" << host << ":" << err;
         return -1.0;
     }
-    
+
     QString output = p.readAllStandardOutput();
-    
+
     // Parse average latency from ping output
     // Linux: "rtt min/avg/max/mdev = 10.123/15.456/20.789/5.123 ms"
     // Windows: "Average = 15ms"
@@ -111,12 +114,15 @@ double SpeedTester::measureLatency(const QString &host) {
 #else
     QRegularExpression re("rtt min/avg/max/mdev = [\\d.]+/([\\d.]+)/");
 #endif
-    
+
     QRegularExpressionMatch match = re.match(output);
     if (match.hasMatch()) {
-        return match.captured(1).toDouble();
+        double latency = match.captured(1).toDouble();
+        qDebug() << "SpeedTester: Latency to" << host << ":" << latency << "ms";
+        return latency;
     }
-    
+
+    qDebug() << "SpeedTester: Could not parse ping output:" << output;
     return -1.0;
 }
 
@@ -124,38 +130,51 @@ double SpeedTester::measureDownloadSpeed(const QString &url, int timeoutMs) {
     QNetworkAccessManager manager;
     QNetworkRequest request(url);
     request.setRawHeader("User-Agent", "SmartAutoRoam/1.0");
-    
+
     QElapsedTimer timer;
     timer.start();
-    
+
     QNetworkReply *reply = manager.get(request);
-    
+
     QEventLoop loop;
     QTimer timeoutTimer;
     timeoutTimer.setSingleShot(true);
-    
+
     connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
     connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
-    
+
     timeoutTimer.start(timeoutMs);
     loop.exec();
-    
-    if (!reply->isFinished() || reply->error() != QNetworkReply::NoError) {
+
+    qint64 elapsedMs = timer.elapsed();
+
+    if (!reply->isFinished()) {
+        qDebug() << "SpeedTester: Download timed out after" << elapsedMs << "ms";
+        reply->abort();
         reply->deleteLater();
         return -1.0;
     }
-    
-    qint64 bytesReceived = reply->bytesAvailable();
-    qint64 elapsedMs = timer.elapsed();
-    
-    reply->deleteLater();
-    
-    if (elapsedMs == 0) {
+
+    if (reply->error() != QNetworkReply::NoError) {
+        qDebug() << "SpeedTester: Download error:" << reply->errorString();
+        reply->deleteLater();
         return -1.0;
     }
-    
+
+    // Read all data to get total bytes received
+    QByteArray data = reply->readAll();
+    qint64 bytesReceived = data.size();
+
+    reply->deleteLater();
+
+    if (elapsedMs == 0 || bytesReceived == 0) {
+        qDebug() << "SpeedTester: Invalid measurement - elapsed:" << elapsedMs << "bytes:" << bytesReceived;
+        return -1.0;
+    }
+
     // Calculate speed in Mbps
     double speedMbps = (bytesReceived * 8.0) / (elapsedMs * 1000.0);
+    qDebug() << "SpeedTester: Downloaded" << bytesReceived << "bytes in" << elapsedMs << "ms =" << speedMbps << "Mbps";
     return speedMbps;
 }
 
@@ -168,8 +187,12 @@ double SpeedTester::measureUploadSpeed(const QString &url, int timeoutMs) {
 }
 
 QString SpeedTester::getTestUrl() const {
-    // Use a small file from a reliable CDN for testing
-    // This is a 1MB test file - adjust size based on needs
-    return "http://speedtest.ftp.otenet.gr/files/test1Mb.db";
+    // Use a small file from a reliable source for testing
+    // Using a 100KB file for quick tests (adjust size based on needs)
+    // Alternative URLs if one fails:
+    // - "http://ipv4.download.thinkbroadband.com/100MB.zip" (larger)
+    // - "http://proof.ovh.net/files/1Mb.dat"
+    // - "http://speedtest.ftp.otenet.gr/files/test1Mb.db"
+    return "http://ipv4.download.thinkbroadband.com/10MB.zip";
 }
 

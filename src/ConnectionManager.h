@@ -7,5 +7,6 @@ class ConnectionManager : public QObject {
 public:
     explicit ConnectionManager(QObject *parent = nullptr);
     bool connectTo(const QString &ssid);
+    bool connectTo(const QString &ssid, const QString &password);
     bool disconnectDevice();
 };

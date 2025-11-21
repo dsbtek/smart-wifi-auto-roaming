@@ -22,6 +22,8 @@ signals:
     void started();
     void stopped();
     void logMessage(const QString &msg);
+    void speedMeasured(double speedMbps);
+    void networkSignal(const QString &ssid, int signal);
 
 private slots:
     void onTick();

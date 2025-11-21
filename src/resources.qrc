@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="/">
-    <!-- icons etc. -->
+    <file>../resources/icons/wifi.svg</file>
+    <file>../resources/icons/wifi.xpm</file>
   </qresource>
 </RCC>
