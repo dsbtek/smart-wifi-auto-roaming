@@ -12,15 +12,18 @@
 #include <QApplication>
 #include <QLabel>
 #include <QVBoxLayout>
+#include <QPainter>
+#include <QPixmap>
 
 // QtCharts is optional - charts will be disabled if not available
 // To enable charts, install: sudo apt install qt6-charts-dev
-// #include <QtCharts/QChart>
-// #include <QtCharts/QChartView>
-// #include <QtCharts/QLineSeries>
-// #include <QtCharts/QDateTimeAxis>
-// #include <QtCharts/QValueAxis>
-// using namespace QtCharts;
+#ifdef HAVE_QTCHARTS
+#include <QtCharts/QChart>
+#include <QtCharts/QChartView>
+#include <QtCharts/QLineSeries>
+#include <QtCharts/QDateTimeAxis>
+#include <QtCharts/QValueAxis>
+#endif
 
 MainWindow::MainWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -148,10 +151,58 @@ void MainWindow::appendLog(const QString &message) {
 }
 
 void MainWindow::setupTrayIcon() {
+    // Check if system tray is available
+    if (!QSystemTrayIcon::isSystemTrayAvailable()) {
+        qDebug() << "Warning: System tray is not available on this system!";
+        appendLog("[WARNING] System tray not available. Tray icon will not be shown.");
+        return;
+    }
+
     // Create tray icon
     m_trayIcon = new QSystemTrayIcon(this);
-    m_trayIcon->setIcon(QIcon(":/resources/icons/wifi.svg"));
+
+    // Create icon with multiple sizes for better tray compatibility
+    // PNG works better than SVG for system tray icons on Linux
+    QIcon trayIcon;
+
+    // Add pre-rendered PNG icons at different sizes
+    trayIcon.addFile(":/resources/icons/wifi_16x16.png", QSize(16, 16));
+    trayIcon.addFile(":/resources/icons/wifi_22x22.png", QSize(22, 22));
+    trayIcon.addFile(":/resources/icons/wifi_24x24.png", QSize(24, 24));
+    trayIcon.addFile(":/resources/icons/wifi_32x32.png", QSize(32, 32));
+    trayIcon.addFile(":/resources/icons/wifi_48x48.png", QSize(48, 48));
+
+    // Fallback to main PNG if specific sizes not found
+    if (trayIcon.isNull()) {
+        trayIcon.addFile(":/resources/icons/wifi.png");
+    }
+
+    // Last resort fallback: XPM
+    if (trayIcon.isNull()) {
+        trayIcon.addFile(":/resources/icons/wifi.xpm");
+    }
+
+    // Ultimate fallback: create a simple colored pixmap
+    if (trayIcon.isNull()) {
+        QPixmap fallback(22, 22);
+        fallback.fill(Qt::transparent);
+        QPainter painter(&fallback);
+        painter.setBrush(QColor("#2196F3"));
+        painter.setPen(Qt::NoPen);
+        painter.drawEllipse(6, 6, 10, 10);
+        trayIcon = QIcon(fallback);
+    }
+
+    m_trayIcon->setIcon(trayIcon);
     m_trayIcon->setToolTip("SmartAutoRoam - WiFi Auto-Roaming");
+
+    // Debug: Check if icon is valid
+    if (trayIcon.isNull()) {
+        qDebug() << "Warning: Tray icon is null!";
+    } else {
+        qDebug() << "Tray icon loaded successfully";
+        qDebug() << "Available sizes:" << trayIcon.availableSizes();
+    }
 
     // Create tray menu
     m_trayMenu = new QMenu(this);
@@ -184,7 +235,7 @@ void MainWindow::setupTrayIcon() {
 }
 
 void MainWindow::setupCharts() {
-#ifdef HAS_QTCHARTS
+#ifdef HAVE_QTCHARTS
     // Setup Signal Strength Chart
     QChart *signalChart = new QChart();
     signalChart->setTitle("Signal Strength Over Time");
@@ -290,7 +341,7 @@ void MainWindow::closeEvent(QCloseEvent *event) {
 }
 
 void MainWindow::updateSignalChart(const QString &ssid, int signal) {
-#ifdef HAS_QTCHARTS
+#ifdef HAVE_QTCHARTS
     if (!m_signalChartView) return;
 
     // Get or create series for this SSID
@@ -333,7 +384,7 @@ void MainWindow::updateSignalChart(const QString &ssid, int signal) {
 }
 
 void MainWindow::updateSpeedChart(double speedMbps) {
-#ifdef HAS_QTCHARTS
+#ifdef HAVE_QTCHARTS
     if (!m_speedSeries) return;
 
     qint64 timestamp = QDateTime::currentMSecsSinceEpoch();

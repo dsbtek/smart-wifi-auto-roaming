@@ -48,6 +48,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/s
 target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets Qt6::Sql Qt6::Core Qt6::Gui Qt6::Network)
 if(Qt6Charts_FOUND)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Charts)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE HAVE_QTCHARTS)
 endif()
 
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)

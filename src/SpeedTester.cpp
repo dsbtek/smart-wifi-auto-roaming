@@ -9,6 +9,9 @@
 #include <QDebug>
 #include <QFile>
 #include <QRegularExpression>
+#include <QSslConfiguration>
+#include <QSslSocket>
+#include <QSslError>
 
 SpeedTester::SpeedTester(QObject *parent) : QObject(parent) {}
 
@@ -127,9 +130,16 @@ double SpeedTester::measureLatency(const QString &host) {
 }
 
 double SpeedTester::measureDownloadSpeed(const QString &url, int timeoutMs) {
+    qDebug() << "SpeedTester: Starting download test from" << url << "with timeout" << timeoutMs << "ms";
+
     QNetworkAccessManager manager;
     QNetworkRequest request(url);
     request.setRawHeader("User-Agent", "SmartAutoRoam/1.0");
+
+    // Set SSL configuration to ignore SSL errors for testing
+    QSslConfiguration sslConfig = request.sslConfiguration();
+    sslConfig.setPeerVerifyMode(QSslSocket::VerifyNone);
+    request.setSslConfiguration(sslConfig);
 
     QElapsedTimer timer;
     timer.start();
@@ -143,13 +153,21 @@ double SpeedTester::measureDownloadSpeed(const QString &url, int timeoutMs) {
     connect(reply, &QNetworkReply::finished, &loop, &QEventLoop::quit);
     connect(&timeoutTimer, &QTimer::timeout, &loop, &QEventLoop::quit);
 
+    // Log SSL errors but don't fail
+    connect(reply, QOverload<const QList<QSslError>&>::of(&QNetworkReply::sslErrors),
+            [](const QList<QSslError> &errors) {
+        for (const auto &error : errors) {
+            qDebug() << "SpeedTester: SSL warning:" << error.errorString();
+        }
+    });
+
     timeoutTimer.start(timeoutMs);
     loop.exec();
 
     qint64 elapsedMs = timer.elapsed();
 
     if (!reply->isFinished()) {
-        qDebug() << "SpeedTester: Download timed out after" << elapsedMs << "ms";
+        qDebug() << "SpeedTester: Download timed out after" << elapsedMs << "ms (timeout was" << timeoutMs << "ms)";
         reply->abort();
         reply->deleteLater();
         return -1.0;
@@ -157,6 +175,8 @@ double SpeedTester::measureDownloadSpeed(const QString &url, int timeoutMs) {
 
     if (reply->error() != QNetworkReply::NoError) {
         qDebug() << "SpeedTester: Download error:" << reply->errorString();
+        qDebug() << "SpeedTester: HTTP status:" << reply->attribute(QNetworkRequest::HttpStatusCodeAttribute).toInt();
+        qDebug() << "SpeedTester: URL:" << url;
         reply->deleteLater();
         return -1.0;
     }
@@ -168,8 +188,14 @@ double SpeedTester::measureDownloadSpeed(const QString &url, int timeoutMs) {
     reply->deleteLater();
 
     if (elapsedMs == 0 || bytesReceived == 0) {
-        qDebug() << "SpeedTester: Invalid measurement - elapsed:" << elapsedMs << "bytes:" << bytesReceived;
+        qDebug() << "SpeedTester: Invalid measurement - elapsed:" << elapsedMs << "ms, bytes:" << bytesReceived;
         return -1.0;
+    }
+
+    // Sanity check: if download was too fast, it might be cached or error page
+    if (bytesReceived < 1000 && elapsedMs < 100) {
+        qDebug() << "SpeedTester: Download suspiciously fast - might be cached or error page";
+        qDebug() << "SpeedTester: Data preview:" << data.left(200);
     }
 
     // Calculate speed in Mbps
@@ -188,11 +214,20 @@ double SpeedTester::measureUploadSpeed(const QString &url, int timeoutMs) {
 
 QString SpeedTester::getTestUrl() const {
     // Use a small file from a reliable source for testing
-    // Using a 100KB file for quick tests (adjust size based on needs)
-    // Alternative URLs if one fails:
-    // - "http://ipv4.download.thinkbroadband.com/100MB.zip" (larger)
-    // - "http://proof.ovh.net/files/1Mb.dat"
-    // - "http://speedtest.ftp.otenet.gr/files/test1Mb.db"
-    return "http://ipv4.download.thinkbroadband.com/10MB.zip";
+    // Using smaller files for quick tests to avoid timeouts
+    // These are reliable CDN URLs that should work globally
+
+    // Ubuntu archive Release file (~270KB, very reliable, global mirrors)
+    // This is perfect for quick speed tests:
+    // - Reliable (Ubuntu's official archive)
+    // - Good size for measurement (not too small, not too large)
+    // - Fast servers worldwide
+    // - No rate limiting
+    return "http://archive.ubuntu.com/ubuntu/dists/jammy/Release";
+
+    // Alternative URLs if the above fails:
+    // - "https://www.google.com/images/branding/googlelogo/2x/googlelogo_color_272x92dp.png" (13KB, very fast)
+    // - "http://archive.ubuntu.com/ubuntu/dists/jammy/main/binary-amd64/Packages.gz" (~3MB)
+    // - "https://cdn.kernel.org/pub/linux/kernel/v6.x/ChangeLog-6.1.1" (~100KB)
 }
 

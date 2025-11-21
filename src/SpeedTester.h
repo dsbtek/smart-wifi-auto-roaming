@@ -41,10 +41,10 @@ private:
     // Test URLs for speed measurement
     QString getTestUrl() const;
     
-    // Maximum time for quick test (ms)
-    static constexpr int QUICK_TEST_TIMEOUT = 3000;
-    
+    // Maximum time for quick test (ms) - increased for 1MB file
+    static constexpr int QUICK_TEST_TIMEOUT = 5000;
+
     // Maximum time for full test (ms)
-    static constexpr int FULL_TEST_TIMEOUT = 10000;
+    static constexpr int FULL_TEST_TIMEOUT = 15000;
 };
 

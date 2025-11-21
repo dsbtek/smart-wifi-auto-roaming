@@ -2,5 +2,11 @@
   <qresource prefix="/">
     <file>../resources/icons/wifi.svg</file>
     <file>../resources/icons/wifi.xpm</file>
+    <file>../resources/icons/wifi.png</file>
+    <file>../resources/icons/wifi_16x16.png</file>
+    <file>../resources/icons/wifi_22x22.png</file>
+    <file>../resources/icons/wifi_24x24.png</file>
+    <file>../resources/icons/wifi_32x32.png</file>
+    <file>../resources/icons/wifi_48x48.png</file>
   </qresource>
 </RCC>
