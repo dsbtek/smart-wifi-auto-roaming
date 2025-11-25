@@ -1,0 +1,4 @@
+Gtk-Message: 18:44:42.451: Failed to load module "canberra-gtk-module"
+Gtk-Message: 18:44:42.471: Failed to load module "canberra-gtk-module"
+Tray icon loaded successfully
+Available sizes: QList(QSize(16, 16), QSize(22, 22), QSize(24, 24), QSize(32, 32), QSize(48, 48))

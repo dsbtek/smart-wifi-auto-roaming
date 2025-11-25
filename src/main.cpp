@@ -7,7 +7,8 @@
 int main(int argc, char *argv[])
 {
     QApplication app(argc, argv);
-    app.setApplicationName("SmartAutoRoam");
+    app.setApplicationName("ZHR");
+    app.setApplicationDisplayName("ZHR – Zero-Handoff Roaming");
 
     // Initialize DB and config
     Database::instance().initialize();

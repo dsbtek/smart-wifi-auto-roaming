@@ -13,9 +13,9 @@ Database& Database::instance() {
 Database::Database() {}
 
 QString Database::dbPath() const {
-    QString dir = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/smart_auto_roam";
+    QString dir = QStandardPaths::writableLocation(QStandardPaths::ConfigLocation) + "/zhr";
     QDir().mkpath(dir);
-    return dir + "/auto_roam.db";
+    return dir + "/zhr.db";
 }
 
 bool Database::initialize() {

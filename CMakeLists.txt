@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.16)
-project(SmartAutoRoam VERSION 0.1 LANGUAGES CXX)
+project(ZHR VERSION 1.0 LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -54,10 +54,10 @@ endif()
 install(TARGETS ${PROJECT_NAME} RUNTIME DESTINATION bin)
 
 # Install desktop file
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/SmartAutoRoam.desktop
+install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/ZHR.desktop
         DESTINATION share/applications)
 
 # Install icon
 install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/resources/icons/wifi.svg
         DESTINATION share/icons/hicolor/scalable/apps
-        RENAME smartautoroam.svg)
+        RENAME zhr.svg)

@@ -193,7 +193,7 @@ void MainWindow::setupTrayIcon() {
     }
 
     m_trayIcon->setIcon(trayIcon);
-    m_trayIcon->setToolTip("SmartAutoRoam - WiFi Auto-Roaming");
+    m_trayIcon->setToolTip("ZHR – Zero-Handoff Roaming");
 
     // Debug: Check if icon is valid
     if (trayIcon.isNull()) {
@@ -229,7 +229,7 @@ void MainWindow::setupTrayIcon() {
     m_trayIcon->show();
 
     // Show notification
-    m_trayIcon->showMessage("SmartAutoRoam", "Application started. Auto-roaming is active.",
+    m_trayIcon->showMessage("ZHR", "Application started. Zero-handoff roaming is active.",
                             QSystemTrayIcon::Information, 3000);
 }
 
@@ -306,7 +306,7 @@ void MainWindow::onTrayIconActivated(QSystemTrayIcon::ActivationReason reason) {
 void MainWindow::toggleAutoRoaming() {
     bool enabled = m_toggleRoamingAction->isChecked();
     QString message = enabled ? "Auto-roaming enabled" : "Auto-roaming disabled";
-    m_trayIcon->showMessage("SmartAutoRoam", message, QSystemTrayIcon::Information, 2000);
+    m_trayIcon->showMessage("ZHR", message, QSystemTrayIcon::Information, 2000);
     appendLog(QString("[SYSTEM] %1").arg(message));
 
     // This will be connected to RoamingManager in main.cpp
@@ -321,7 +321,7 @@ void MainWindow::showWindow() {
 
 void MainWindow::hideToTray() {
     hide();
-    m_trayIcon->showMessage("SmartAutoRoam", "Running in background. Click tray icon to show.",
+    m_trayIcon->showMessage("ZHR", "Running in background. Click tray icon to show.",
                             QSystemTrayIcon::Information, 2000);
 }
 

@@ -1,22 +1,22 @@
 #!/bin/bash
 #
-# SmartAutoRoam Universal Installer
+# ZHR (Zero-Handoff Roaming) Universal Installer
 # Installs dependencies, builds the app, registers icons,
 # desktop file, and places the binary in /usr/local/bin.
 #
 
 set -e
 
-APP_NAME="SmartAutoRoam"
+APP_NAME="ZHR"
 INSTALL_PREFIX="/usr/local"
 BIN_PATH="$INSTALL_PREFIX/bin/$APP_NAME"
 DESKTOP_FILE="/usr/share/applications/$APP_NAME.desktop"
-ICON_PATH="/usr/share/icons/hicolor/64x64/apps/smartautoroam.png"
+ICON_PATH="/usr/share/icons/hicolor/64x64/apps/zhr.png"
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BUILD_DIR="$SCRIPT_DIR/build"
 
-echo "🚀 SmartAutoRoam Installation Starting..."
+echo "🚀 ZHR (Zero-Handoff Roaming) Installation Starting..."
 
 # ---------------------------------------
 # 1. Install Dependencies
@@ -27,11 +27,10 @@ apt update
 apt install -y \
     cmake \
     g++ \
-    qtbase5-dev \
-    qttools5-dev \
-    qtcharts5-dev \
-    libqt5charts5-dev \
-    qt5-qmake \
+    qt6-base-dev \
+    qt6-tools-dev \
+    libqt6charts6-dev \
+    qmake6 \
     libsqlite3-dev
 
 echo "✅ Dependencies installed."
@@ -39,7 +38,7 @@ echo "✅ Dependencies installed."
 # ---------------------------------------
 # 2. Build Application
 # ---------------------------------------
-echo "🔧 Building SmartAutoRoam..."
+echo "🔧 Building ZHR..."
 
 mkdir -p "$BUILD_DIR"
 cd "$BUILD_DIR"
@@ -63,12 +62,40 @@ echo "✅ Binary installed."
 # ---------------------------------------
 echo "🖼 Installing icon..."
 
-# Optional: convert SVG to PNG
+# Install multiple icon sizes for better compatibility
+ICON_DIR="/usr/share/icons/hicolor"
+
+# Install PNG icons in various sizes
+for size in 16 22 24 32 48; do
+    ICON_SRC="$SCRIPT_DIR/resources/icons/wifi_${size}x${size}.png"
+    ICON_DEST="$ICON_DIR/${size}x${size}/apps/zhr.png"
+    if [ -f "$ICON_SRC" ]; then
+        mkdir -p "$ICON_DIR/${size}x${size}/apps"
+        cp "$ICON_SRC" "$ICON_DEST"
+        echo "  ✓ Installed ${size}x${size} icon"
+    fi
+done
+
+# Install 64x64 icon (main size)
 ICON_SRC="$SCRIPT_DIR/resources/icons/wifi.png"
 if [ -f "$ICON_SRC" ]; then
-    cp "$ICON_SRC" "$ICON_PATH"
-else
-    echo "⚠️ No PNG icon found. Install will continue."
+    mkdir -p "$ICON_DIR/64x64/apps"
+    cp "$ICON_SRC" "$ICON_DIR/64x64/apps/zhr.png"
+    echo "  ✓ Installed 64x64 icon"
+fi
+
+# Install SVG icon (scalable)
+ICON_SVG="$SCRIPT_DIR/resources/icons/wifi.svg"
+if [ -f "$ICON_SVG" ]; then
+    mkdir -p "$ICON_DIR/scalable/apps"
+    cp "$ICON_SVG" "$ICON_DIR/scalable/apps/zhr.svg"
+    echo "  ✓ Installed scalable SVG icon"
+fi
+
+# Update icon cache
+if command -v gtk-update-icon-cache &> /dev/null; then
+    gtk-update-icon-cache -f -t "$ICON_DIR" 2>/dev/null || true
+    echo "  ✓ Icon cache updated"
 fi
 
 echo "✨ Icon installed."
@@ -80,16 +107,27 @@ echo "📄 Installing desktop entry..."
 
 cat <<EOF > "$DESKTOP_FILE"
 [Desktop Entry]
-Name=Smart Auto Roam
-Comment=Automatically connects to the strongest WiFi available
-Exec=$BIN_PATH
-Icon=smartautoroam
-Terminal=false
+Version=1.0
 Type=Application
-Categories=Network;Utility;
+Name=ZHR
+GenericName=Zero-Handoff Roaming
+Comment=Real-time, speed-aware WiFi auto-roaming with zero interruptions
+Exec=$BIN_PATH
+Icon=zhr
+Terminal=false
+Categories=Network;System;Settings;
+Keywords=wifi;network;roaming;wireless;connection;zero-handoff;zhr;
+StartupNotify=true
+StartupWMClass=ZHR
 EOF
 
 chmod 644 "$DESKTOP_FILE"
+
+# Update desktop database
+if command -v update-desktop-database &> /dev/null; then
+    update-desktop-database /usr/share/applications 2>/dev/null || true
+    echo "  ✓ Desktop database updated"
+fi
 
 echo "📎 Desktop entry installed."
 
@@ -98,15 +136,15 @@ echo "📎 Desktop entry installed."
 # ---------------------------------------
 echo "📂 Creating configuration directory..."
 
-mkdir -p /etc/smartautoroam
-mkdir -p /var/lib/smartautoroam
+mkdir -p /etc/zhr
+mkdir -p /var/lib/zhr
 
 echo "🌐 Installing default database (if missing)..."
-if [ ! -f /var/lib/smartautoroam/data.db ]; then
-    touch /var/lib/smartautoroam/data.db
+if [ ! -f /var/lib/zhr/data.db ]; then
+    touch /var/lib/zhr/data.db
 fi
 
 echo "🎉 Installation Complete!"
-echo "You can now launch SmartAutoRoam from:"
+echo "You can now launch ZHR from:"
 echo "  → Application Menu"
-echo "  → Or run: SmartAutoRoam"
+echo "  → Or run: ZHR"

@@ -1,13 +1,13 @@
 #!/bin/bash
 #
-# SmartAutoRoam - Universal Run Script
+# ZHR (Zero-Handoff Roaming) - Universal Run Script
 # ------------------------------------------------------------
 # Features:
 #  - Auto-detect missing build/ and trigger CMake + Make
 #  - Checks Qt and QtCharts availability
 #  - Prevents snap library conflicts
 #  - Logs runtime crashes to logs/app.log
-#  - Runs SmartAutoRoam cleanly on any Linux distro
+#  - Runs ZHR cleanly on any Linux distro
 #
 
 set -e
@@ -25,7 +25,7 @@ export GTK_MODULES=""
 # ---------------------------------------
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BUILD_DIR="$SCRIPT_DIR/build"
-BINARY="$BUILD_DIR/SmartAutoRoam"
+BINARY="$BUILD_DIR/ZHR"
 
 # ---------------------------------------
 # 3. ENSURE LOGS FOLDER EXISTS
@@ -62,10 +62,10 @@ fi
 # ---------------------------------------
 # 6. RUN THE APP WITH LOGGING
 # ---------------------------------------
-echo "🚀 Launching SmartAutoRoam..."
+echo "🚀 Launching ZHR (Zero-Handoff Roaming)..."
 echo "📄 Logs: $SCRIPT_DIR/logs/app.log"
 
 cd "$BUILD_DIR"
 
 # Run and capture any crash logs
-./SmartAutoRoam "$@" 2>> "$SCRIPT_DIR/logs/app.log"
+./ZHR "$@" 2>> "$SCRIPT_DIR/logs/app.log"

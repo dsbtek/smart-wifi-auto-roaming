@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to SmartAutoRoam will be documented in this file.
+All notable changes to ZHR (Zero-Handoff Roaming) will be documented in this file.
 
 ## [Unreleased] - Speed-Based Switching Refactoring
 

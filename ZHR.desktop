@@ -1,0 +1,14 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Name=ZHR
+GenericName=Zero-Handoff Roaming
+Comment=Real-time, speed-aware WiFi auto-roaming with zero interruptions
+Exec=/usr/local/bin/ZHR
+Icon=zhr
+Terminal=false
+Categories=Network;System;Settings;
+Keywords=wifi;network;roaming;wireless;connection;zero-handoff;zhr;
+StartupNotify=true
+StartupWMClass=ZHR
+
